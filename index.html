@@ -457,12 +457,14 @@ function togStatus(id){
   if(!it)return;
   it.status=it.status==='pago'?'pendente':'pago';
   save();renderDespesas();
+  syncItem(it);
 }
 
 function delItem(id){
   if(!confirm('Excluir este lancamento?'))return;
   ST.items=ST.items.filter(function(i){return i.id!==id});
   save();renderDespesas();
+  syncDelete(id);
 }
 
 function toggleRecur(){
@@ -528,16 +530,30 @@ function saveItem(){
   var notes=document.getElementById('f-notes').value.trim();
   var recurrent=document.getElementById('f-recur').checked;
   var recurN=parseInt(document.getElementById('f-recur-n').value)||12;
+  var newItems=[];
   if(editId){
     var it=ST.items.find(function(i){return i.id===editId});
-    if(it)Object.assign(it,{name:name,value:value,person:person,category:category,month:month,status:status,payment:payment,notes:notes,recurrent:recurrent});
+    if(it){Object.assign(it,{name:name,value:value,person:person,category:category,month:month,status:status,payment:payment,notes:notes,recurrent:recurrent});newItems=[it];}
   } else {
     var total=recurrent?recurN:1;
     for(var n=0;n<total;n++){
-      ST.items.push({id:uid(),name:name,value:value,person:person,category:category,month:n===0?month:addMths(month,n),status:'pendente',payment:payment,notes:notes,recurrent:recurrent});
+      var ni={id:uid(),name:name,value:value,person:person,category:category,month:n===0?month:addMths(month,n),status:'pendente',payment:payment,notes:notes,recurrent:recurrent};
+      ST.items.push(ni);newItems.push(ni);
     }
   }
   save();closeModal();renderDespesas();
+  newItems.forEach(function(item){syncItem(item)});
+}
+
+function syncItem(item){
+  if(!ST.apiUrl)return;
+  var url=ST.apiUrl+'?action=upsert&item='+encodeURIComponent(JSON.stringify(item));
+  fetch(url).catch(function(e){console.warn('Sync error:',e)});
+}
+
+function syncDelete(id){
+  if(!ST.apiUrl)return;
+  fetch(ST.apiUrl+'?action=delete&id='+encodeURIComponent(id)).catch(function(e){console.warn('Sync error:',e)});
 }
 
 function renderHistorico(){
