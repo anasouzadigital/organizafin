@@ -124,7 +124,7 @@ tr:hover td{background:rgba(42,157,143,.06)}
 <body>
 <div class="app">
 <header>
-  <div class="logo">🧩 Nós Organizados</div>
+  <div class="logo">&#x1F9E9; Nós Organizados</div>
   <nav>
     <button class="nb active" id="nb-overview" onclick="showScreen('overview')"><i class="ti ti-layout-dashboard"></i> Visão Geral</button>
     <button class="nb" id="nb-contas" onclick="showScreen('contas')"><i class="ti ti-list-check"></i> Contas</button>
@@ -404,7 +404,7 @@ function showScreen(s) {
 
 function buildMonthSel(el, val) {
   el.innerHTML = '';
-  for (var y = CY-1; y <= CY+1; y++) {
+  for (var y = CY; y <= CY+1; y++) {
     MK.forEach(function(m,i){
       var k = y+'-'+m;
       var o = document.createElement('option');
@@ -484,9 +484,9 @@ function getFilters() {
 
 function applyFilters(items, filters) {
   return items.filter(function(i){
-    if (filters.person && i.person!==filters.person) return false;
-    if (filters.status && i.status!==filters.status) return false;
-    if (filters.pay && i.payment!==filters.pay) return false;
+    if (filters.person && i.person !== filters.person) return false;
+    if (filters.status && i.status !== filters.status) return false;
+    if (filters.pay && (i.payment||'') !== filters.pay) return false;
     return true;
   });
 }
@@ -496,7 +496,11 @@ function renderContas() {
   var filters = getFilters();
 
   var recs = recByMonth(m);
-  var recsFiltered = applyFilters(recs, filters);
+  var recsFiltered = recs.filter(function(r){
+    if (filters.person && r.person !== filters.person) return false;
+    if (filters.status && r.status !== filters.status) return false;
+    return true;
+  });
   var recvd = recs.filter(function(r){ return r.status==='recebido'; });
   var recPend = recs.filter(function(r){ return r.status==='pendente'; });
   var recOpen = lastPerson==='__receitas';
@@ -515,7 +519,7 @@ function renderContas() {
       '<div class="acc-body'+(recOpen?' open':'')+'">'+
         '<div class="acc-tb">' +
           '<button class="btn primary" onclick="openRecModal(null)"><i class="ti ti-plus"></i> Adicionar</button>' +
-          '<span style="font-size:.85rem;color:var(--text3)">Total: <strong style="color:var(--green)">'+fmt(sum(recs))+'</strong></span>' +
+          '<span style="font-size:.85rem;color:var(--text3)">Total: <strong style="color:var(--green)">'+fmt(sum(recsFiltered))+'</strong></span>' +
         '</div>' +
         '<div class="tbl-wrap">'+recTable(recsFiltered)+'</div>' +
       '</div>' +
@@ -545,7 +549,7 @@ function renderContas() {
         '<div class="acc-body'+(isOpen?' open':'')+'">'+
           '<div class="acc-tb">' +
             '<button class="btn primary" onclick="openAdd(\''+person+'\')"><i class="ti ti-plus"></i> Adicionar</button>' +
-            '<span style="font-size:.85rem;color:var(--text3)">Total: <strong style="color:var(--text)">'+fmt(sum(allPerson))+'</strong></span>' +
+            '<span style="font-size:.85rem;color:var(--text3)">Total: <strong style="color:var(--text)">'+fmt(sum(filtered))+'</strong></span>' +
           '</div>' +
           '<div class="tbl-wrap">'+itemTable(filtered)+'</div>' +
         '</div>' +
