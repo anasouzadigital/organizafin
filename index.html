@@ -329,7 +329,7 @@ var lastPerson = null;
 var catChart = null, payChart = null, histChart = null;
 
 var ST = {
-  apiUrl: 'https://script.google.com/macros/s/AKfycbw_Y14CAj5MvCUdZEzRKocCs__ndY6w-uSCys9Lsvay-rlRFbGwaqf9hWKUazV-aphq/exec',
+  apiUrl: 'https://script.google.com/macros/s/AKfycbzpVBw4wjLfeQeoM3QnOgX_KRed4scjbW0cFkY67MF5LFmMIHU9dSj9WixfXG_1bquv/exec',
   categories: ['Moradia','Casa','Animais','Saude e Bem-estar','Alimentacao','Transporte','Assinaturas e Tech','Lazer e Viagens','Reservas','Outros'],
   people: ['Ana','Guh'],
   items: [],
@@ -383,6 +383,27 @@ function init() {
   buildMonthSel(document.getElementById('dep-month'),CURKEY);
   updatePersonFilter();
   renderOverview();
+  autoSync();
+}
+
+async function autoSync() {
+  if (!ST.apiUrl) return;
+  try {
+    var r = await fetch(ST.apiUrl + '?action=getAll');
+    var d = await r.json();
+    if (d.items && d.items.length > 0) {
+      d.items = d.items.map(function(i) {
+        if (i.month && i.month.length > 7) i.month = i.month.slice(0,7);
+        return i;
+      });
+      ST.items = d.items;
+      save();
+      renderOverview();
+      renderDespesas();
+    }
+  } catch(e) {
+    console.warn('AutoSync error:', e);
+  }
 }
 
 function updatePersonFilter() {
