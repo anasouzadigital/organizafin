@@ -157,14 +157,14 @@ tr:hover td{background:rgba(42,157,143,.06)}
   </div>
   <div class="filter-bar">
     <label><i class="ti ti-filter" style="font-size:.9rem"></i> Filtrar</label>
-    <select id="f-fil-person" onchange="renderContas()"><option value="">Todos</option></select>
-    <select id="f-fil-status" onchange="renderContas()">
+    <select id="f-fil-person" onchange=""><option value="">Todos</option></select>
+    <select id="f-fil-status" onchange="">
       <option value="">Todos status</option>
       <option value="pendente">Pendente</option>
       <option value="pago">Pago</option>
       <option value="recebido">Recebido</option>
     </select>
-    <select id="f-fil-pay" onchange="renderContas()">
+    <select id="f-fil-pay" onchange="">
       <option value="">Todas formas</option>
       <option value="Cartao de Credito">Cartão de Crédito</option>
       <option value="Debito">Débito</option>
@@ -173,6 +173,7 @@ tr:hover td{background:rgba(42,157,143,.06)}
       <option value="Dinheiro">Dinheiro</option>
       <option value="TED/DOC">TED/DOC</option>
     </select>
+    <button class="btn primary" onclick="applyAndOpen()"><i class="ti ti-filter"></i> Aplicar</button>
     <button class="btn" onclick="clearFilters()"><i class="ti ti-x"></i> Limpar</button>
   </div>
   <div id="acc-receitas"></div>
@@ -428,10 +429,20 @@ function updatePersonFilter() {
   });
 }
 
+function applyAndOpen() {
+  // abre todos os blocos ao aplicar filtro
+  lastPerson = '__all';
+  renderContas();
+  // força abertura de todos os blocos
+  document.querySelectorAll('.acc-body').forEach(function(b){ b.classList.add('open'); });
+  document.querySelectorAll('.chev').forEach(function(c){ c.classList.add('open'); });
+}
+
 function clearFilters() {
   document.getElementById('f-fil-person').value = '';
   document.getElementById('f-fil-status').value = '';
   document.getElementById('f-fil-pay').value = '';
+  lastPerson = null;
   renderContas();
 }
 
