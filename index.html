@@ -506,10 +506,10 @@ function renderDespesas() {
             '<span class="sp ok"><i class="ti ti-check" style="font-size:.85rem"></i> '+recvd.length+' recebidas</span>' +
             '<span class="sp pend"><i class="ti ti-clock" style="font-size:.85rem"></i> '+recPend.length+' pendentes</span>' +
           '</div>' +
-          '<i class="ti ti-chevron-down chev"></i>' +
+          '<i class="ti ti-chevron-down chev'+(lastPerson==='__receitas'?' open':'')+'"></i>' +
         '</div>' +
       '</div>' +
-      '<div class="acc-body">' +
+      '<div class="acc-body'+(lastPerson==='__receitas'?' open':'')+'">'+
         '<div class="acc-tb">' +
           '<button class="btn primary" onclick="openRecModal(null)"><i class="ti ti-plus"></i> Adicionar</button>' +
           '<span style="font-size:.85rem;color:var(--text3)">Total: <strong style="color:var(--green)">'+fmt(sum(recs))+'</strong></span>' +
@@ -527,7 +527,7 @@ function renderDespesas() {
     var filtered = applyFilters(allPerson, filters);
     var p = allPerson.filter(function(i){ return i.status==='pago'; });
     var pe = allPerson.filter(function(i){ return i.status==='pendente'; });
-    var isOpen = lastPerson===person || (!lastPerson && idx===0);
+    var isOpen = lastPerson === person;
     document.getElementById(pid).innerHTML =
       '<div class="acc '+cls+'">' +
         '<div class="acc-hd" onclick="togAcc(this)">' +
