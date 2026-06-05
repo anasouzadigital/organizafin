@@ -297,8 +297,8 @@ tr:hover td{background:rgba(42,157,143,.06)}
     <div class="fr"><label>Dia do recebimento</label><input type="text" id="r-day" placeholder="Ex: 5, toda segunda..."></div>
     <div class="fr"><label>Tipo</label>
       <select id="r-type">
-        <option value="mensal">Mensal fixo</option>
-        <option value="semanal">Semanal fixo</option>
+        <option value="mensal">Mensal</option>
+        <option value="semanal">Semanal</option>
       </select>
     </div>
     <div class="fr"><label>Mes</label><select id="r-month"></select></div>
@@ -329,7 +329,7 @@ var lastPerson = null;
 var catChart = null, payChart = null, histChart = null;
 
 var ST = {
-  apiUrl: 'https://script.google.com/macros/s/AKfycbzpVBw4wjLfeQeoM3QnOgX_KRed4scjbW0cFkY67MF5LFmMIHU9dSj9WixfXG_1bquv/exec',
+  apiUrl: 'https://script.google.com/macros/s/AKfycbzdniGM5k9oaJFRJtYh7Ewm0dL_amfzcjKWgEr7-YU0uC541KyrAiIVQiL6155G2JRj/exec',
   categories: ['Moradia','Casa','Animais','Saude e Bem-estar','Alimentacao','Transporte','Assinaturas e Tech','Lazer e Viagens','Reservas','Outros'],
   people: ['Ana','Guh'],
   items: [],
@@ -397,10 +397,17 @@ async function autoSync() {
         return i;
       });
       ST.items = d.items;
-      save();
-      renderOverview();
-      renderDespesas();
     }
+    if (d.receitas && d.receitas.length > 0) {
+      d.receitas = d.receitas.map(function(r) {
+        if (r.month && r.month.length > 7) r.month = r.month.slice(0,7);
+        return r;
+      });
+      ST.receitas = d.receitas;
+    }
+    save();
+    renderOverview();
+    renderDespesas();
   } catch(e) {
     console.warn('AutoSync error:', e);
   }
@@ -783,9 +790,11 @@ function saveRec() {
   var notes = document.getElementById('r-notes').value.trim();
   if(editRecId) {
     var r = ST.receitas.find(function(r){ return r.id===editRecId; });
-    if(r) Object.assign(r,{name,value,person,day,type,month,status,notes});
+    if(r){ Object.assign(r,{name,value,person,day,type,month,status,notes}); syncRec(r); }
   } else {
-    ST.receitas.push({id:uid(),name,value,person,day,type,month,status,notes});
+    var nr = {id:uid(),name,value,person,day,type,month,status,notes};
+    ST.receitas.push(nr);
+    syncRec(nr);
   }
   save(); closeRecModal(); renderDespesas(); renderOverview();
 }
@@ -867,6 +876,14 @@ function syncItem(item){
 function syncDelete(id){
   if(!ST.apiUrl) return;
   fetch(ST.apiUrl+'?action=delete&id='+encodeURIComponent(id)).catch(function(e){console.warn('sync err',e);});
+}
+function syncRec(item){
+  if(!ST.apiUrl) return;
+  fetch(ST.apiUrl+'?action=upsertRec&item='+encodeURIComponent(JSON.stringify(item))).catch(function(e){console.warn('sync err',e);});
+}
+function syncDelRec(id){
+  if(!ST.apiUrl) return;
+  fetch(ST.apiUrl+'?action=deleteRec&id='+encodeURIComponent(id)).catch(function(e){console.warn('sync err',e);});
 }
 
 function exportData(){
