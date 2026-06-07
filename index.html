@@ -116,9 +116,12 @@ tr:hover td{background:rgba(42,157,143,.06)}
 .hist-tbl tr:hover td{background:rgba(42,157,143,.06)}
 .empty{text-align:center;padding:2rem;color:var(--text3);font-size:.95rem}
 .empty i{font-size:2rem;display:block;margin-bottom:.5rem;color:var(--border)}
-.sync-indicator{font-size:.75rem;color:var(--text3);display:flex;align-items:center;gap:.3rem;padding:.2rem 0}
-.sync-indicator.syncing{color:var(--warn)}
-.sync-indicator.synced{color:var(--green)}
+.progress-wrap{padding:.4rem .85rem .6rem;background:var(--bg3);border-bottom:1px solid var(--border2)}
+.progress-info{display:flex;gap:1rem;margin-bottom:.35rem;flex-wrap:wrap}
+.progress-info span{font-size:.78rem;color:var(--text3);display:flex;align-items:center;gap:.3rem}
+.progress-info strong{color:var(--text2)}
+.progress-bar-bg{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.progress-bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
 </style>
 </head>
 <body>
@@ -742,9 +745,10 @@ function saveItem() {
     var it = ST.items.find(function(i){ return i.id===editId; });
     if (it) { Object.assign(it,{name:name,value:value,person:person,category:category,month:month,status:status,payment:payment,notes:notes,recurrent:recurrent}); toSync.push(it); }
   } else {
-    var total = recurrent?recurN:1;
+    var total = recurrent ? recurN : 1;
     for (var n=0; n<total; n++) {
-      var ni = {id:uid(),name:name,value:value,person:person,category:category,month:n===0?month:addMths(month,n),status:'pendente',payment:payment,notes:notes,recurrent:recurrent};
+      var itemStatus = (recurrent && n > 0) ? 'pendente' : status;
+      var ni = {id:uid(),name:name,value:value,person:person,category:category,month:n===0?month:addMths(month,n),status:itemStatus,payment:payment,notes:notes,recurrent:recurrent};
       ST.items.push(ni); toSync.push(ni);
     }
   }
